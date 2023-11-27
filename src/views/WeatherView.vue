@@ -90,21 +90,27 @@ async function getWeather() {
             errorMessage.value = null;
         }
         const locationData = await getLocation();
-        let unitOfTemp:string = 'F';
-        if(unitChar.value == 'C') {
-            unitOfTemp = 'metric';
-        } else if(unitChar.value == 'F') {
-            unitOfTemp = 'imperial';
-        }
-        const apiURL = 'https://api.openweathermap.org/data/2.5/weather?lat='+locationData.lat+'&lon='+locationData.lon+'&units='+ unitOfTemp +'&appid='+apiKey;
-        try {
-            const response = await fetch(apiURL);
-            if(!response.ok) {
-                throw new Error('No weather data available. Try again later.');
+        if(locationData) {
+            let unitOfTemp:string = 'F';
+            if(unitChar.value == 'C') {
+                unitOfTemp = 'metric';
+            } else if(unitChar.value == 'F') {
+                unitOfTemp = 'imperial';
             }
-            weatherData.value = await response.json();
-        } catch(error) {
-            errorMessage.value = error as string;
+            const apiURL = 'https://api.openweathermap.org/data/2.5/weather?lat='+locationData.lat+'&lon='+locationData.lon+'&units='+ unitOfTemp +'&appid='+apiKey;
+            try {
+                const response = await fetch(apiURL);
+                if(!response.ok) {
+                    throw new Error('No weather data available. Try again later.');
+                }
+                weatherData.value = await response.json();
+            } catch(error) {
+                errorMessage.value = error as string;
+            }
+            if(weatherData.value) {
+                weatherData.value.main.temp = Math.round(weatherData.value.main.temp);
+                weatherData.value.main.feels_like = Math.round(weatherData.value.main.feels_like);
+            }
         }
     }
 }
@@ -117,7 +123,13 @@ const resetData = () => {
 
 const toggleUnit = () => {
     useTempUnitStore().toggleUnit();
-    console.log(useTempUnitStore().getTempUnit());
+    if(weatherData.value && unitChar.value == 'C') {
+        weatherData.value.main.temp = Math.round((weatherData.value.main.temp - 32) * 5/9);
+        weatherData.value.main.feels_like = Math.round((weatherData.value.main.feels_like - 32) * 5/9);
+    } else if(weatherData.value && unitChar.value == 'F') {
+        weatherData.value.main.temp = Math.round((weatherData.value.main.temp * 9/5) + 32);
+        weatherData.value.main.feels_like = Math.round((weatherData.value.main.feels_like * 9/5) + 32);
+    }
 }
 
 </script>
@@ -129,18 +141,11 @@ interface WeatherData {
     main: {
         temp: number;
         feels_like: number;
-        temp_min: number;
-        temp_max: number;
-        pressure: number;
         humidity: number;
     };
     wind: {
         speed: number;
         deg: number;
-    };
-    weather: {
-        description: string;
-        main:string;
     };
 }
 
