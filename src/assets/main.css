@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+#app {
+    color: #fff0f0;
+}
+
+h1 {
+    font-size: 30px;
+}
+
+body {
+    background-color: #242424;
+    font-family: 'Source Code Pro',sans-serif;
+    font-size: 20px;
+}
+
+button {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.goodButton {
+    cursor: pointer;
+    background-color: #55efc4;
+}
+.badButton {
+    cursor: not-allowed;
+    background-color: #ff7675;
+}
+
